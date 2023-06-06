@@ -34,9 +34,11 @@
   <ItemGroup>
     <None Remove="dto\" />
     <None Remove="middleware\" />
+    <None Remove="sql\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="dto\" />
     <Folder Include="middleware\" />
+    <Folder Include="sql\" />
   </ItemGroup>
 </Project>
