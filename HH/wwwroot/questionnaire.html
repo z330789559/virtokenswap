@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <meta charset="UTF-8">
+    <title>风险控制调查问卷</title>
+    <!-- 引入Element UI库 -->
+    <link rel="stylesheet" href="//unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="//unpkg.com/vue/dist/vue.js"></script>
+    <script src="//unpkg.com/element-ui/lib/index.js"></script>
+</head>
+
+<style>
+    button {
+        background-color: #909399; /* background */
+        border: none; /* Remove borders */
+        color: black; /* text */
+        padding: 15px 32px; /* Some padding */
+        text-align: center; /* Center text */
+        text-decoration: none; /* Remove underline */
+        display: inline-block; /* Make it a block element */
+        font-size: 16px; /* Set font size */
+        margin: 4px 2px; /* Add margin */
+        cursor: pointer; /* Add cursor on hover */
+        border-radius: 30px; /* Add rounded corners */
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 20vh;
+        width: 100vh;
+        margin: 0 auto;
+    }
+
+</style>
+
+
+<body>
+    <div id="app">
+        <h1 align="center">{{ title }}</h1>
+        <form>
+            <div v-for="(question, index) in questions" :key="index">
+                <p>{{ question.title }}</p>
+                <el-radio-group v-model="question.answer" style="
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: flex-start;">
+                    <el-radio :label="option" v-for="(option, optionIndex) in question.options" :key="optionIndex">{{ option }}</el-radio>
+                </el-radio-group>
+            </div>
+            <div class="container">
+                <el-button type="primary" @click="goToResult">提交</el-button>
+            </div>
+        </form>
+    </div>
+</body>
+<!-- import Vue and element-ui -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- import Axios -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            title: '风险控制调查问卷',
+            questions: [
+                {
+                    title: "1.将资金投资60天后，其价格下跌了60%。假设其他基本情况都不变，你会怎么做？",
+                    options: ["卖掉，以避免更大的担忧，并再试试其他项目", "什么也不做，等待投资收回", "继续买入，正是投资的好机会，同时现在它也是便宜的投资"],
+                    answer: "",
+                },
+                {
+                    title: "2.现在换一个角度看上面的问题。投资价格下跌了20%，但它是投资组合的一部分。用来在三个不同的时间段上达到投资目标。如果投资目标是五年后，你会怎么做？",
+                    options: ["抛出", "什么也不做", "继续买入"],
+                    answer: "",
+                },
+                {
+                    title: "3.如果投资目标是15年后，你会怎么做？",
+                    options: ["抛出", "什么也不做", "继续买入"],
+                    answer: "",
+                },
+                {
+                    title: "4.如果投资目标是30年后，你会怎么做？",
+                    options: ["抛出", "什么也不做", "继续买入"],
+                    answer: "",
+                },
+                {
+                    title: "5.你的退休金在买入1个月以后，价格上涨25%，而且基本条件没有变化。在你心满意足之后，你会怎么做？",
+                    options: ["抛出，锁定收入", "继续持有，期待更多收益", "继续买入，可能还会涨"],
+                    answer: "",
+                },
+                {
+                    title: "6.你投资了养老保险，期限在15年以上，你更愿意",
+                    options: ["投资于货币市场基金或保证收益的投资合约，放弃可能得到的资本利得，重点保证资本金安全", "一半债卷，一半股票基金，希望在有些增长的同时，也能成为自己拥有固定收入的保障", "投资于激进型的共同基金，它的价值在年内可能有大幅波动，但在5年或10年后有巨额收益的潜力"],
+                    answer: "",
+                },
+                {
+                    title: "7.你刚刚中了大奖，但具体哪一个由你决定",
+                    options: ["2000美元现金", "50 % 的机会获得5000美元", "20 % 的机会获得15000美金"],
+                    answer: "",
+                },
+                {
+                    title: "8.一个很好的投资机会来临，但你必须借款，你会贷款吗？",
+                    options: ["绝对不会", "也许会", "会的"],
+                    answer: "",
+                },
+                {
+                    title: "9.你所在的公司要把股票卖给员工，公司管理层计划在三年后使公司上市，在上市之前，你不能抛售手中的股票，也没有分红，但上市时，你的投资可能会翻10倍，你会投资多少钱？",
+                    options: ["一点也不", "2个月工资", "4个月工资"],
+                    answer: "",
+                },
+            ]
+        },
+        methods: {
+            getAnalysisResult: function () {//调值
+            },
+            goToResult: function () {
+                window.location.href = "result.html"; // 返回到result.html页面
+            }
+        }
+    })
+</script>
+
+</html>

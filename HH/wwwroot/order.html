@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://unpkg.com/element-plus@next"></script>
+    <title>订单系统</title>
+</head>
+<style>
+    button {
+        background-color: #909399; /* background */
+        border: none; /* Remove borders */
+        color: black; /* text */
+        padding: 15px 32px; /* Some padding */
+        text-align: center; /* Center text */
+        text-decoration: none; /* Remove underline */
+        display: inline-block; /* Make it a block element */
+        font-size: 16px; /* Set font size */
+        margin: 4px 2px; /* Add margin */
+        cursor: pointer; /* Add cursor on hover */
+        border-radius: 30px; /* Add rounded corners */
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 20vh;
+        width: 100vh;
+        margin: 0 auto;
+    }
+</style>
+
+<body>
+    <div id="app" style="padding-right: 40px; padding-left: 40px; padding-bottom: 50px;">
+        <!--主窗口-->
+        <el-card style="padding-right: 20px; padding-left: 20px; padding-bottom: 40px;" header="订单系统">
+            <el-row>
+                <el-col :xs="24" :md="12">
+                    <el-input placeholder="请输入查找条件" v-model="keyword" class="input-with-select">
+                        <el-button slot="append" icon="el-icon-search" @click="query"></el-button>
+                    </el-input>
+                </el-col>
+            </el-row>
+            <el-row>
+                <template>
+                    <!-- `checked` 为 true 或 false -->
+                    <el-checkbox v-model="checked">订单id</el-checkbox>
+                </template>
+                <script>
+                    export default {
+                        data() {
+                            return {
+                                checked: true
+                            };
+                        }
+                    };
+                </script>
+                <template>
+                    <!-- `checked` 为 true 或 false -->
+                    <el-checkbox v-model="checked">订单创建时间</el-checkbox>
+                </template>
+                <script>
+                    export default {
+                        data() {
+                            return {
+                                checked: true
+                            };
+                        }
+                    };
+                </script>
+                <template>
+                    <!-- `checked` 为 true 或 false -->
+                    <el-checkbox v-model="checked">货币名称</el-checkbox>
+                </template>
+                <script>
+                    export default {
+                        data() {
+                            return {
+                                checked: true
+                            };
+                        }
+                    };
+                </script>
+            </el-row>
+
+            <!-- 默认初始界面 -->
+            <el-table style="top: 20px;" :data="Orderlist" :fit="true" :show-header="true">
+                <el-table-column prop="OrderId" label="订单编号">
+                </el-table-column>
+                <el-table-column prop="CreateTime" label="订单创建时间">
+                </el-table-column>
+
+                <el-table-column label="订单明细" fixed="right" width="200px">
+                    <template slot-scope="scope">
+                        <el-button mc-type="column-el-button" size="mini" type="primary" @click="showdetails(scope.row)">查看</el-button>
+                        <el-button mc-type="column-el-button" size="mini" type="danger" @click="changedetails(scope.row)">修改</el-button>
+                    </template>
+                </el-table-column>
+
+                <el-table-column label="操作" fixed="right" width="200px">
+                    <template slot-scope="scope">
+                        <el-button mc-type="column-el-button" size="mini" type="primary" @click="deleteOrder(scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+</div>
+    <div class="container">
+        <button onclick="window.location.href='main.html'">主界面</button>
+        <button onclick="window.location.href='htmlpage.html'">添加订单</button>
+    </div>
+
+
+
+
+
+</body>
+<!-- import Vue and element-ui -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- import Axios -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    var vue = new Vue({
+        el: '#app',
+        data: {
+            orders:[],
+            keyword: "",
+            Orderlist: [], //订单列表
+            Goodlist: [],//货物列表
+            //Customerlist: [],//顾客列表
+            currentOrder: {}, //当前编辑的订单明细
+            dialogVisible: false, //对话框是否显示
+            editMode: false  //当前是否是编辑模式（还是添加模式）
+        },
+        methods: {
+            query: function (keyword) {
+                var path = '/api/orders';
+                if (this.keyword != "") path = path + this.keyword;
+                var self = this
+                axios.get(path)
+                    .then(response => self.Orderlist = response.data)
+                    .catch(e => self.$message.error(e.response.data))
+            },
+
+            deleteOrder: function (Order) {
+                var self = this
+                axios.delete('api/orders/' + Order.id)
+                    .then(response => self.query())
+                    .catch(e => self.$message.error(e.response.data))
+            },
+
+            showdetails: function (Order) {
+                this.dialogVisible = true
+                this.editMode = false;
+                this.currentOrder = Object.assign({}, Order)
+            },
+
+            changedetails: function (Order) {
+                this.dialogVisible = true
+                this.editMode = true;
+                this.currentOrder = Object.assign({}, Order)
+            },
+
+
+
+        }
+    })
+    vue.query();
+</script>
+</html>

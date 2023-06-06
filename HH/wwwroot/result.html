@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>风险分析结果</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<style>
+    button {
+        background-color: #909399; /* background */
+        border: none; /* Remove borders */
+        color: black; /* text */
+        padding: 15px 32px; /* Some padding */
+        text-align: center; /* Center text */
+        text-decoration: none; /* Remove underline */
+        display: inline-block; /* Make it a block element */
+        font-size: 16px; /* Set font size */
+        margin: 4px 2px; /* Add margin */
+        cursor: pointer; /* Add cursor on hover */
+        border-radius: 30px; /* Add rounded corners */
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 20vh;
+        width: 100vh;
+        margin: 0 auto;
+    }
+
+    .container-1 {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        height: 10vh;
+        margin: 0 auto;
+    }
+</style>
+
+<body>
+    <div id="app">
+        <h1 align="center">风险分析结果</h1>
+        <el-table :data="analysisResult" style="width: 100%">
+            <el-table-column prop="questionnaireUtilityValue" label="问卷效用值"></el-table-column>
+            <el-table-column prop="riskCombinationWeight" label="风险组合占投资组合的权重"></el-table-column>
+            <el-table-column prop="riskFreeCombinationWeight" label="无风险组合占投资组合的权重"></el-table-column>
+        </el-table>
+        <div class="container">
+            <el-button type="primary" @click="backToMain">返回</el-button>
+        </div>
+</body>
+
+<!-- import Vue and element-ui -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- import Axios -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                analysisResult: []
+            }
+        },
+        methods: {
+            getAnalysisResult: function () {//调值
+            },
+            backToMain: function () {
+                window.location.href = "main.html"; // 返回到main.html页面
+            }
+        },
+        mounted: function () {
+            this.getAnalysisResult();
+        }
+    })
+</script>
+
+</html>
