@@ -11,7 +11,7 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 06/06/2023 23:51:50
+ Date: 07/06/2023 22:44:42
 */
 
 SET NAMES utf8mb4;
@@ -26,7 +26,7 @@ CREATE TABLE `Goods` (
   `Name` longtext NOT NULL,
   `Price` double NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
 
 -- ----------------------------
 -- Table structure for OrderDetails
@@ -41,7 +41,7 @@ CREATE TABLE `OrderDetails` (
   `OrderId` int NOT NULL DEFAULT '0',
   `Quantity` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
 
 -- ----------------------------
 -- Table structure for Orders
@@ -51,8 +51,9 @@ CREATE TABLE `Orders` (
   `OrderId` int NOT NULL AUTO_INCREMENT,
   `UserId` int NOT NULL DEFAULT '0',
   `CreateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `TotalPrice` decimal(10,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`OrderId`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb3;
 
 -- ----------------------------
 -- Table structure for Result
@@ -82,7 +83,7 @@ CREATE TABLE `User` (
   `Password` longtext NOT NULL,
   `Asset` double NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 
 -- ----------------------------
 -- Table structure for VirtualToken
@@ -94,7 +95,7 @@ CREATE TABLE `VirtualToken` (
   `DayReturn` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_ci NOT NULL DEFAULT '',
   `Price` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb3;
 
 -- ----------------------------
 -- Table structure for __EFMigrationsHistory

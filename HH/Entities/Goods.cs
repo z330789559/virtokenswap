@@ -16,6 +16,13 @@
             Name = name;
             Price = price;
         }
+        public Goods(string name, double price,int id ) : this()
+        {
+            Name = name;
+            Price = price;
+            Id = id;
+        }
+
 
         public override bool Equals(object? obj)
         {

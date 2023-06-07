@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using HH.Dao;
+using HH.utils;
+using System.Net;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace HH.Controllers
 {
@@ -27,7 +30,7 @@ namespace HH.Controllers
 
         // GET: api/riskAnalysis/1
         [HttpGet]
-        public ActionResult<List<VirtualToken>> GetVirtualTokenPrice()
+        public ActionResult<ApiResponse<IEnumerable<VirtualToken>>> GetVirtualTokenPrice()
         {
             VirtualTokenDbContext virtualTokenDbContext = markowitzModel.virtualTokenDbContext;
             WebCrawler webCrawler = new WebCrawler(virtualTokenDbContext);
@@ -35,14 +38,14 @@ namespace HH.Controllers
             var virtualTokens = virtualTokenDbContext.VirtualTokens.ToList();
             if (virtualTokens.Count == null)
             {
-                return NotFound();
+                return Ok(ApiResponseFactory.CreateErrorResponse<VirtualToken>("未发现记录", (int)HttpStatusCode.NoContent));
             }
             //int virtualTokenId = Convert.ToInt32(id);
-            return virtualTokens;
+            return Ok(ApiResponseFactory.CreateSuccessResponse<List<VirtualToken>>(virtualTokens));
         }
 
         [HttpPost("{resid,virtualTokenId1,virtualTokenId2}")]
-        public ActionResult<Result> GetCovarianceResult(int resId, int virtualTokenId1, int virtualTokenId2)
+        public ActionResult<ApiResponse<Result>> GetCovarianceResult(int resId, int virtualTokenId1, int virtualTokenId2)
         {
             VirtualTokenDbContext virtualTokenDbContext = markowitzModel.virtualTokenDbContext;
             WebCrawler webCrawler = new WebCrawler(virtualTokenDbContext);
@@ -51,7 +54,7 @@ namespace HH.Controllers
             var virtualToken2 = virtualTokenDbContext.VirtualTokens.SingleOrDefault(o => o.Id == virtualTokenId2);
             if (virtualToken1 == null || virtualToken2 == null)
             {
-                return NotFound();
+                return Ok(ApiResponseFactory.CreateErrorResponse<VirtualToken>("未发现记录", (int)HttpStatusCode.NoContent));
             }
             
             Result result1 = markowitzModel.GetCovarianceMatrix(resId,virtualTokenId1, virtualTokenId2);
@@ -60,7 +63,7 @@ namespace HH.Controllers
             //virtualTokenDbContext.Results.Add(result1);
             //virtualTokenDbContext.SaveChanges();
             //Result test = virtualTokenDbContext.Results.SingleOrDefault(o=>o.Id == virtualTokenId1 + " " + virtualTokenId2);
-            return result1;
+            return Ok(ApiResponseFactory.CreateSuccessResponse<Result>(result1));
         }
 
         /*

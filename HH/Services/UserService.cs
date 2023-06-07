@@ -84,6 +84,13 @@ namespace HH.Services
 
             return dto;
         }
+
+        public void Register(User user)
+        {
+            dbContext.Add(user);
+            dbContext.SaveChanges();
+
+        }
         private string GeneroterJwt(User user)
         {
 
@@ -94,7 +101,7 @@ namespace HH.Services
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                 new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Sid, user.Id.ToString())
+                new Claim("UserId", user.Id.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),

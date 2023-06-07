@@ -11,10 +11,14 @@ namespace HH.Entities
         public int OrderId { get; set; }
 
         public int UserId { get; set; }
+        [Column("TotalPrice")]
+        public double TotalPriceValue { get; set; }
+
 
         [ForeignKey("UserId")]
         public User? User { get; set; }
 
+   
         public string? UserName { get => (User != null) ? User.Name : ""; }
 
         public DateTime CreateTime { get; set; }
@@ -34,10 +38,14 @@ namespace HH.Entities
             this.Details = items;
         }
 
+        [NotMapped]
         public double TotalPrice
         {
             get => Details.Sum(item => item.TotalPrice);
+          
+    
         }
+
 
         public void AddDetail(OrderDetail orderItem)
         {

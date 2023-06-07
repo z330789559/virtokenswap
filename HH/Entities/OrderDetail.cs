@@ -10,10 +10,15 @@ namespace HH.Entities
 
         public int? GoodsId { get; set; }
 
+        [Column("GoodsName")]
+        public string GoodsNameValue { get; set; }
+        [Column("UnitPrice")]
+        public double? UnitPriceValue { get; set; }
+
         [ForeignKey("GoodsId")]
         public Goods? GoodsItem { get; set; }
 
-        public String? GoodsName { get => GoodsItem != null ? this.GoodsItem.Name : ""; }
+        public String? GoodsName { get => GoodsItem != null ? this.GoodsItem.Name : "";  }
 
         public double? UnitPrice { get => GoodsItem != null ? this.GoodsItem.Price : 0.0; }
 
@@ -32,8 +37,12 @@ namespace HH.Entities
             this.Index = index;
             this.GoodsItem = goods;
             this.Quantity = quantity;
+            this.GoodsId = goods.Id;
+            this.GoodsNameValue =goods.Name;
+            this.UnitPriceValue = goods.Price;
         }
 
+        
         public double TotalPrice
         {
             get => GoodsItem == null ? 0.0 : GoodsItem.Price * Quantity;

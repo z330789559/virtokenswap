@@ -22,12 +22,12 @@ public class JwtMiddleware
             var handler = new JwtSecurityTokenHandler();
             var decodedToken = handler.ReadJwtToken(token);
 
-            var sidClaim = decodedToken.Claims.FirstOrDefault(c => c.Type == "sid");
+            var sidClaim = decodedToken.Claims.FirstOrDefault(c => c.Type == "UserId");
             if (sidClaim != null)
             {
                 string sid = sidClaim.Value;
                 // 在这里将 sid 存储到 HttpContext 中，以便后续请求使用
-                context.Items["Sid"] = sid;
+                context.Items["UserId"] = sid;
             }
         }
 

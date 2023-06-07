@@ -91,6 +91,10 @@ namespace HH.Services
             User newUser = new User(user.Name, user.Password);
             newUser.Id = userId;
             newUser.Asset = user.Asset - amount;
+            if(newUser.Asset < 0)
+            {
+                throw new Exception("金额不足");
+            }
             userDbContext.Users.Remove(user);
             userDbContext.Entry(newUser).State = EntityState.Added;
             userDbContext.SaveChanges();
@@ -118,6 +122,12 @@ namespace HH.Services
             orderDbContext.SaveChanges();
         }
 
+        public void AddOrderDetail(List<OrderDetail> items)
+        {
+            orderDbContext.OrderDetails.AddRange(items);
+            orderDbContext.SaveChanges();
+        }
+
         public void RemoveOrder(int orderId)
         {
             var order = orderDbContext.Orders
@@ -133,13 +143,15 @@ namespace HH.Services
         {
           
             TakeOut(userId, order.TotalPrice);
+            order.TotalPriceValue = order.TotalPrice;
             AddOrder(order);
+            AddOrderDetail(order.Details);
         }
 
-        public void DeleteOrderByUser(int userId, int orderId)
+        public void DeleteOrderByUser(int orderId)
         {
             var order = GetOrder(orderId);
-            SendIn(userId, order.TotalPrice);
+            SendIn(order.UserId, order.TotalPrice);
             RemoveOrder(orderId);
         }
 
@@ -163,7 +175,12 @@ namespace HH.Services
                 .Include(o => o.Details)
                 .ThenInclude(d => d.GoodsItem)
                 .Include(o => o.User)
-                .Where(order => (order.User.Id == userId) && (order.Details.Any(item => item.GoodsItem.Name == goodsName)));
+                .Where(order => (order.User.Id == userId));
+            if(goodsName!=null)
+            {
+                query = query.Where(order => order.Details.Any(item => EF.Functions.Like(item.GoodsItem.Name, $"%{goodsName}%")));
+            }
+            // && (order.Details.Any(item => item.GoodsItem.Name == goodsName))
             return query.ToList();
         }
         //

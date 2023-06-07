@@ -6,12 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using HH.dto;
 using Microsoft.AspNetCore.Routing;
+using HH.utils;
+using System.Net;
 
 namespace HH.Controllers
 {
     //[Authorize]
     [ApiController]
-    [Route("api/orders")]
+    [Route("api")]
     //[Route("api/users")]
     public class OrderUserController : ControllerBase
     {
@@ -26,48 +28,143 @@ namespace HH.Controllers
         }
         // GET: api/Order
         [HttpGet]
-        public ActionResult<List<Order>> GetOrders()
+        public ActionResult<ApiResponse<IEnumerable<List<Order>>>> GetOrders()
         {
-            return orderService.GetAllOrders();
+            return Ok(ApiResponseFactory.CreateSuccessResponse<List<Order>>(orderService.GetAllOrders()));
         }
 
         // GET: api/Order/1
-        [HttpGet("{id}")]
-        public ActionResult<Order> GetOrder(int id)
+        [HttpGet("/orders/{id}")]
+        public ActionResult<ApiResponse<Order>> GetOrder(int id)
         {
             var order = orderService.GetOrder(id);
             if (order == null)
             {
-                return NotFound();
+               var fail= ApiResponseFactory.CreateErrorResponse<Order>("未发现记录",(int)HttpStatusCode.NoContent);
+                return Ok(fail);
             }
-            return order;
+            var response = ApiResponseFactory.CreateSuccessResponse<Order>(order);
+            return Ok(response);
         }
 
 
 
         
 
-        [HttpGet("{userId,orderId}")]
-        public ActionResult<Order> QueryOrderByOrderId(int userId, int orderId)
+        [HttpGet("/orders")]
+        public ActionResult<ApiResponse<IEnumerable<Order>>> QueryOrderByOrderId()
         {
-            
-            if (userId == null) { return NotFound(); }
-            var order = orderService.QueryOrderByOrderId(userId, orderId);
+            string sid = "";
+            if (HttpContext.Items.ContainsKey("UserId"))
+            {
+                string? v = (string?)HttpContext.Items["UserId"];
+                sid = v;
+            }
+            else
+            {
+                return Unauthorized("用户未登录");
+            }
+            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            // 解码和验证令牌
+            //var userId = orderService.ValidateToken(token);
+            int userId = int.Parse(sid);
+            if (userId == 0) { return Unauthorized("用户未登录"); }
+            var order = orderService.QueryOrdersByUserName(userId);
             if (order == null)
             {
-                return NotFound();
+                var fail = ApiResponseFactory.CreateErrorResponse<List<Order>>("未发现记录", (int)HttpStatusCode.NoContent);
+                return Ok(fail);
             }
-            return order;
+            return Ok(ApiResponseFactory.CreateSuccessResponse<List<Order>>(order));
         }
 
 
-        [HttpGet("{goodsName}")]
-        public ActionResult<List<Order>> QueryOrdersByGoodsName( string goodsName)
+        [HttpGet("good")]
+        public ActionResult<ApiResponse<IEnumerable<Order>>> QueryOrdersByGoodsName( string? goodsName)
         {
             string sid = "";
-            if (HttpContext.Items.ContainsKey("Sid"))
+            if (HttpContext.Items.ContainsKey("UserId"))
             {
-                 sid = HttpContext.Items["Sid"].ToString();
+                string? v = (string?)HttpContext.Items["UserId"];
+                sid = v;
+            }
+            else
+            {
+                return Unauthorized("用户未登录");
+            }
+            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            // 解码和验证令牌
+            //var userId = orderService.ValidateToken(token);
+            int userId =int.Parse(sid);
+            if (userId == 0) { return Unauthorized("用户未登录"); }
+            return Ok(ApiResponseFactory.CreateSuccessResponse<List<Order>>(orderService.QueryOrdersByGoodsName(userId, goodsName)));
+        }
+
+        [HttpGet("user/assest")]
+        public ActionResult<ApiResponse<object>> QueryByTotalAmount(float amount)
+        {
+            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            // 解码和验证令牌
+            //var userId = orderService.ValidateToken(token);
+            string sid = "";
+            if (HttpContext.Items.ContainsKey("UserId"))
+            {
+                string? v = (string?)HttpContext.Items["UserId"];
+                sid = v;
+            }
+            else
+            {
+                return Unauthorized("用户未登录");
+            }
+            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            // 解码和验证令牌
+            //var userId = orderService.ValidateToken(token);
+            int userId = int.Parse(sid);
+            if (userId == 0) { return Unauthorized("用户未登录"); }
+            return Ok(ApiResponseFactory.CreateSuccessResponse<object>(orderService.QueryByTotalAmount(userId, amount)));
+        }
+
+
+
+        [HttpPost("login")]
+        public ActionResult<ApiResponse<UserDto>> Login([FromBody]UserDto user)
+        {
+            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            // 解码和验证令牌
+            //var userId = orderService.ValidateToken(token);
+        
+                if ( user.Name == "" || user.Password=="") { return Ok(ApiResponseFactory.CreateErrorResponse<UserDto>("用户名称和密码不能为null",(int)HttpStatusCode.BadRequest)); }
+                return Ok(ApiResponseFactory.CreateSuccessResponse<UserDto>(this.userService.Login(user)));
+
+
+        }
+
+        [HttpPost("register")]
+        public ActionResult<ApiResponse<User>> Register([FromBody] UserDto user)
+        {
+            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            // 解码和验证令牌
+            //var userId = orderService.ValidateToken(token);
+
+            if (user.Name == "" || user.Password == "") { return Ok(ApiResponseFactory.CreateErrorResponse<User>("用户名称和密码不能为null", (int)HttpStatusCode.BadRequest)); }
+
+            User userDo = new User();
+            userDo.Name = user.Name;
+            userDo.Password = user.Password;
+            this.userService.Register(userDo);
+            return Ok(ApiResponseFactory.CreateSuccessResponse<User>(userDo));
+
+
+        }
+
+        [HttpPut("order")]
+        public ActionResult<Order> AddOrder([FromBody]OrderDto  orderDto)
+        {
+            string sid = "";
+            if (HttpContext.Items.ContainsKey("UserId"))
+            {
+                string? v = (string?)HttpContext.Items["UserId"];
+                sid = v;
             }
             else
             {
@@ -76,61 +173,45 @@ namespace HH.Controllers
             //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             // 解码和验证令牌
             //var userId = orderService.ValidateToken(token);
-            int userId =int.Parse(sid);
+            int userId = int.Parse(sid);
             if (userId == 0) { return NotFound(); }
-            return orderService.QueryOrdersByGoodsName(userId, goodsName);
-        }
-
-        [HttpGet("{userId,amount}")]
-        public ActionResult<object> QueryByTotalAmount(int userId, float amount)
-        {
-            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            // 解码和验证令牌
-            //var userId = orderService.ValidateToken(token);
-            if (userId == null) { return NotFound(); }
-            return orderService.QueryByTotalAmount(userId, amount);
-        }
-
-
-
-        [HttpPost("login")]
-        public ActionResult<UserDto> Login([FromBody]UserDto user)
-        {
-            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            // 解码和验证令牌
-            //var userId = orderService.ValidateToken(token);
-        
-                if ( user.Name == "" || user.Password=="") { return BadRequest("用户名称和密码不能为null"); }
-                return this.userService.Login(user);
-
-
-        }
-
-        [HttpPut()]
-        public ActionResult<Order> AddOrder(int userId,  Order order)
-        {
-            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            // 解码和验证令牌
-            //var userId = orderService.ValidateToken(token);
             try
             {
-                if (userId == null) { return NotFound(); }
+                Order order = new Order();
+                order.UserId = userId;
+
+                order.Details = orderDto.GoodIds.Select(g => new OrderDetail( g.id,new Goods(g.name,g.price,g.id),g.quality)).ToList();
                 orderService.AddOrderByUser(userId, order);
-                
+                return Ok(ApiResponseFactory.CreateSuccessResponse<Order>(order));
             }
             catch (Exception e)
             {
-                return BadRequest(e.InnerException.Message);
+                return BadRequest(e.ToString());
             }
 
             return NoContent();
         }
        
         // Post: api/Order
-        [HttpPost()]
+        [HttpPost("order")]
         public ActionResult<Order> udpateOrder(Order order)
         {
-   
+
+            string sid = "";
+            if (HttpContext.Items.ContainsKey("UserId"))
+            {
+                string? v = (string?)HttpContext.Items["UserId"];
+                sid = v;
+            }
+            else
+            {
+                return BadRequest("用户未登录");
+            }
+            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            // 解码和验证令牌
+            //var userId = orderService.ValidateToken(token);
+            int userId = int.Parse(sid);
+            if (userId == 0) { return NotFound(); }
             try
             {
                 orderService.UpdateOrder(order);
@@ -147,16 +228,27 @@ namespace HH.Controllers
         
 
 
-        [HttpDelete("{userId,orderId}")]
-        public ActionResult<Order> DeleteOrder(int userId, int orderId)
+        [HttpDelete("order/{id}")]
+        public ActionResult<Order> DeleteOrder( int orderId)
         {
+            string sid = "";
+            if (HttpContext.Items.ContainsKey("UserId"))
+            {
+                string? v = (string?)HttpContext.Items["UserId"];
+                sid = v;
+            }
+            else
+            {
+                return BadRequest("用户未登录");
+            }
             //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             // 解码和验证令牌
             //var userId = orderService.ValidateToken(token);
+            int userId = int.Parse(sid);
+            if (userId == 0) { return NotFound(); }
             try
             {
-                if (userId == null) { return NotFound(); }
-                orderService.DeleteOrderByUser(userId, orderId);
+                orderService.DeleteOrderByUser(orderId);
             }
             catch (Exception e)
             {

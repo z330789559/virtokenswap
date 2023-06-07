@@ -10,6 +10,8 @@ using HH.Dao;
 using HH.Entities;
 using HH.Services;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace HH
 {
@@ -55,7 +57,26 @@ namespace HH
          
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            new string[] {}
+        }
+    });
+            }); ;
             //builder.Services.AddScoped<HH.Services.OrderService>();
             //��DbContext���뵽����
       
@@ -65,7 +86,29 @@ namespace HH
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                    c.RoutePrefix = "api-docs";
+                    c.DocExpansion(DocExpansion.None);
+                    c.EnableFilter();
+                    c.EnableDeepLinking();
+
+                    // Add JWT token to authorization header
+                    c.DisplayOperationId();
+                    c.EnableValidator();
+                    c.SupportedSubmitMethods(SubmitMethod.Get, SubmitMethod.Post, SubmitMethod.Put, SubmitMethod.Delete);
+                    c.OAuthScopeSeparator(" ");
+                    c.OAuthAdditionalQueryStringParams(new Dictionary<string, string> { { "response_type", "code id_token" } });
+                    c.OAuthUsePkce();
+
+                    // Add JWT token to authorization header
+                    c.InjectJavascript("/js/swagger-ui.js");
+                    c.DocExpansion(DocExpansion.None);
+
+                    c.EnableDeepLinking();
+        
+                });
             }
 
             app.UseDefaultFiles(); //����ȱʡ��̬ҳ�棨index.html��index.htm��
