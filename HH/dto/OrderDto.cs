@@ -4,7 +4,8 @@ namespace HH.dto
 	public class OrderDto
 	{
         public List<GoodDto> GoodIds { set; get; }
-		public double Amount { get; set; }
+
+		public  string PayAssest { set; get; }
 
         public OrderDto()
 		{

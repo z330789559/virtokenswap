@@ -73,7 +73,14 @@ namespace HH.Services
                         //_dbContext.SaveChanges();
                     }
                 }
-                _dbContext.SaveChanges();
+                try
+                {
+                    _dbContext.SaveChanges();
+                }catch(Exception e)
+                {
+
+                }
+
 
                 // Save changes to the database
 

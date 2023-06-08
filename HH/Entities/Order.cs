@@ -11,6 +11,16 @@ namespace HH.Entities
         public int OrderId { get; set; }
 
         public int UserId { get; set; }
+
+        public int Status { get; set; }
+
+        public int Type { get; set; }
+
+        public string? Name { get; set; }
+        public string? Tips { get; set; }
+
+        public string PayAssest { get; set; }
+
         [Column("TotalPrice")]
         public double TotalPriceValue { get; set; }
 

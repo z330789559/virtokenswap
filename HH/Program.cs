@@ -26,7 +26,7 @@ namespace HH
                 options.AddDefaultPolicy(
                     policy =>
                     {
-                        policy.WithOrigins("http://localhost:5087");
+                        policy.WithOrigins("http://localhost:5087,https://localhost:7228");
                     });
             });
             var configuration = builder.Configuration;
@@ -114,7 +114,7 @@ namespace HH
             app.UseDefaultFiles(); //����ȱʡ��̬ҳ�棨index.html��index.htm��
             app.UseStaticFiles(); //���þ�̬�ļ���ҳ�桢js��ͼƬ�ȸ���ǰ���ļ���
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();//
 
             app.UseCors();
             /*

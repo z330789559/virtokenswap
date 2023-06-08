@@ -65,6 +65,14 @@ namespace HH.Services
         }
 
 
+        public User? GetUser(int userId)
+        {
+            var user = dbContext.Users
+           .SingleOrDefault(o => o.Id == userId);
+            if (user == null) return null;
+            return user;
+        }
+
         public UserDto Login(UserDto user)
         { 
   

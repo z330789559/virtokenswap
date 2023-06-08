@@ -8,6 +8,8 @@ using HH.dto;
 using Microsoft.AspNetCore.Routing;
 using HH.utils;
 using System.Net;
+using System.Runtime.CompilerServices;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace HH.Controllers
 {
@@ -34,7 +36,7 @@ namespace HH.Controllers
         }
 
         // GET: api/Order/1
-        [HttpGet("/orders/{id}")]
+        [HttpGet("orders/{id}")]
         public ActionResult<ApiResponse<Order>> GetOrder(int id)
         {
             var order = orderService.GetOrder(id);
@@ -51,7 +53,7 @@ namespace HH.Controllers
 
         
 
-        [HttpGet("/orders")]
+        [HttpGet("orders")]
         public ActionResult<ApiResponse<IEnumerable<Order>>> QueryOrderByOrderId()
         {
             string sid = "";
@@ -125,6 +127,24 @@ namespace HH.Controllers
         }
 
 
+        [HttpGet("user/{id}")]
+        public ActionResult<ApiResponse<User>> User(int id)
+        {
+            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            // 解码和验证令牌
+            //var userId = orderService.ValidateToken(token);
+
+            User user = this.userService.GetUser(id);
+                if (user == null)
+            {
+                Ok(ApiResponseFactory.CreateErrorResponse<User>("用户不存在", (int)HttpStatusCode.BadRequest));
+            }
+            return Ok(ApiResponseFactory.CreateSuccessResponse<User>(user));
+
+
+        }
+
+
 
         [HttpPost("login")]
         public ActionResult<ApiResponse<UserDto>> Login([FromBody]UserDto user)
@@ -148,6 +168,7 @@ namespace HH.Controllers
 
             if (user.Name == "" || user.Password == "") { return Ok(ApiResponseFactory.CreateErrorResponse<User>("用户名称和密码不能为null", (int)HttpStatusCode.BadRequest)); }
 
+            if(user.Password !=user.confirmPassword) { return Ok(ApiResponseFactory.CreateErrorResponse<User>("密码和确认密码不匹配", (int)HttpStatusCode.BadRequest)); }
             User userDo = new User();
             userDo.Name = user.Name;
             userDo.Password = user.Password;
@@ -157,8 +178,8 @@ namespace HH.Controllers
 
         }
 
-        [HttpPut("order")]
-        public ActionResult<Order> AddOrder([FromBody]OrderDto  orderDto)
+        [HttpPost("order/add")]
+        public ActionResult<ApiResponse<Order>> AddOrder([FromBody]OrderDto  orderDto)
         {
             string sid = "";
             if (HttpContext.Items.ContainsKey("UserId"))
@@ -168,9 +189,9 @@ namespace HH.Controllers
             }
             else
             {
-                return BadRequest("用户未登录");
+                return Unauthorized("用户未登录");
             }
-            //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            //var token = httpContext.Request.Hea   ders["Authorization"].FirstOrDefault()?.Split(" ").Last();
             // 解码和验证令牌
             //var userId = orderService.ValidateToken(token);
             int userId = int.Parse(sid);
@@ -179,22 +200,23 @@ namespace HH.Controllers
             {
                 Order order = new Order();
                 order.UserId = userId;
-
+                order.PayAssest = orderDto.PayAssest;
+                order.Name = "购买";
+                order.Tips = "点我康康";
                 order.Details = orderDto.GoodIds.Select(g => new OrderDetail( g.id,new Goods(g.name,g.price,g.id),g.quality)).ToList();
                 orderService.AddOrderByUser(userId, order);
                 return Ok(ApiResponseFactory.CreateSuccessResponse<Order>(order));
             }
             catch (Exception e)
             {
-                return BadRequest(e.ToString());
+                return Ok(ApiResponseFactory.CreateErrorResponse<User>(e.ToString(), (int)HttpStatusCode.BadRequest)); ;
             }
 
-            return NoContent();
         }
        
         // Post: api/Order
         [HttpPost("order")]
-        public ActionResult<Order> udpateOrder(Order order)
+        public ActionResult<ApiResponse<Order>> udpateOrder(Order order)
         {
 
             string sid = "";
@@ -205,13 +227,13 @@ namespace HH.Controllers
             }
             else
             {
-                return BadRequest("用户未登录");
+                return Unauthorized("用户未登录");
             }
             //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             // 解码和验证令牌
             //var userId = orderService.ValidateToken(token);
             int userId = int.Parse(sid);
-            if (userId == 0) { return NotFound(); }
+            if (userId == 0) { return Unauthorized("用户未登录"); }
             try
             {
                 orderService.UpdateOrder(order);
@@ -220,16 +242,16 @@ namespace HH.Controllers
             {
                 string error = e.Message;
                 if (e.InnerException != null) error = e.InnerException.Message;
-                return BadRequest(error);
+                return Ok(ApiResponseFactory.CreateErrorResponse<Order>(e.ToString(), (int)HttpStatusCode.BadRequest));
             }
-            return NoContent();
+                return Ok(ApiResponseFactory.CreateSuccessResponse<Order>(order));
         }
 
         
 
 
         [HttpDelete("order/{id}")]
-        public ActionResult<Order> DeleteOrder( int orderId)
+        public ActionResult<ApiResponse<Order>> DeleteOrder( int orderId)
         {
             string sid = "";
             if (HttpContext.Items.ContainsKey("UserId"))
@@ -239,22 +261,22 @@ namespace HH.Controllers
             }
             else
             {
-                return BadRequest("用户未登录");
+                return     Unauthorized("用户未登录");
             }
             //var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             // 解码和验证令牌
             //var userId = orderService.ValidateToken(token);
             int userId = int.Parse(sid);
-            if (userId == 0) { return NotFound(); }
+            if (userId == 0) { Unauthorized("用户未登录"); }
             try
             {
                 orderService.DeleteOrderByUser(orderId);
             }
             catch (Exception e)
             {
-                return BadRequest(e.InnerException.Message);
+                return Ok(ApiResponseFactory.CreateErrorResponse<Order>(e.ToString(), (int)HttpStatusCode.BadRequest));
             }
-            return NoContent();
+            return Ok(ApiResponseFactory.CreateSuccessResponse<Order>(null));
         }
 
     }

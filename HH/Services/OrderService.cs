@@ -189,8 +189,7 @@ namespace HH.Services
             return orderDbContext.Orders
                 .Include(o => o.Details)
                 .ThenInclude(d => d.GoodsItem)
-                .Include("User")
-              .Where(order => order.User.Id == userId)
+              .Where(order => order.UserId == userId)
               .ToList();
         }
 
